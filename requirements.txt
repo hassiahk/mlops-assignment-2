@@ -1,4 +1,4 @@
-scikit-learn
-dataprep
+Flask
+pandas
+numpy
 joblib
-tpot
