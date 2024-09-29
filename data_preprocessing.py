@@ -4,6 +4,7 @@ from dataprep.datasets import load_dataset
 from dataprep.eda import create_report
 from dataprep.eda.missing import plot_missing
 from sklearn.preprocessing import MinMaxScaler
+import joblib
 
 # Step 1: Load the Dataset
 df = load_dataset("titanic")
@@ -67,3 +68,5 @@ df = pd.get_dummies(df, columns=encoded_cols, drop_first=True)  # drop_first=Tru
 # Scale 'Fare' and 'FamilySize' using Min-Max Scaler
 scaler = MinMaxScaler()
 df[['Fare', 'FamilySize']] = scaler.fit_transform(df[['Fare', 'FamilySize']])
+ 
+joblib.dump(scaler, "scaler.save")
