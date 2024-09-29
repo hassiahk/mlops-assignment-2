@@ -1,10 +1,10 @@
-from flask import Flask, request, jsonify
-import pandas as pd
-import pickle
-import numpy as np
-import joblib
-
 import os
+import pickle
+
+import joblib
+import numpy as np
+import pandas as pd
+from flask import Flask, jsonify, request
 
 abspath = os.path.abspath(__file__)
 dname = os.path.dirname(abspath)
@@ -42,25 +42,25 @@ def predict():
         df["Fare"] = df["Fare"].astype(float)
 
         # Preprocess data (adapt to your specific feature names)
-        df["Sex_male"] = np.where(df['Sex'] == 'male', 1, 0)
+        df["Sex_male"] = np.where(df["Sex"] == "male", 1, 0)
 
         # Drop the original 'Sex' column
-        df = df.drop(columns=['Sex'])
+        df = df.drop(columns=["Sex"])
 
         # Handle Age values
         bins = [0, 18, 35, 60, np.inf]
-        labels = ['child', 'young_adult', 'adult', 'elderly']
-        df['AgeGroup'] = pd.cut(df['Age'], bins=bins, labels=labels, right=False)
+        labels = ["child", "young_adult", "adult", "elderly"]
+        df["AgeGroup"] = pd.cut(df["Age"], bins=bins, labels=labels, right=False)
 
         # Drop the original 'Age' column
-        df = df.drop(columns=['Age'])
+        df = df.drop(columns=["Age"])
 
         # Handle Embarked values
-        df["Embarked_Q"] = np.where(df['Embarked'] == 'Q', 1, 0)
-        df["Embarked_S"] = np.where(df['Embarked'] == 'S', 1, 0)
+        df["Embarked_Q"] = np.where(df["Embarked"] == "Q", 1, 0)
+        df["Embarked_S"] = np.where(df["Embarked"] == "S", 1, 0)
 
         # Drop the original 'Embarked' column
-        df = df.drop(columns=['Age'])
+        df = df.drop(columns=["Embarked"])
 
         # Handle Family feature
         df["FamilySize"] = df["SibSp"] + df["Parch"] + 1
@@ -69,14 +69,28 @@ def predict():
         df = df.drop(["Parch", "SibSp"], axis=1)
 
         # Handle interaction feature
-        df["AgeGroup_young_adult"] = np.where(df['AgeGroup'] == 'young_adult', 1, 0)
-        df["AgeGroup_adult"] = np.where(df['AgeGroup'] == 'adult', 1, 0)
-        df["AgeGroup_elderly"] = np.where(df['AgeGroup'] == 'elderly', 1, 0)
+        df["AgeGroup_young_adult"] = np.where(df["AgeGroup"] == "young_adult", 1, 0)
+        df["AgeGroup_adult"] = np.where(df["AgeGroup"] == "adult", 1, 0)
+        df["AgeGroup_elderly"] = np.where(df["AgeGroup"] == "elderly", 1, 0)
 
-        df = df.drop(columns=['AgeGroup'])
+        df = df.drop(columns=["AgeGroup"])
 
         # Scaling Fare and FamilySize features
-        df[['Fare', 'FamilySize']] = scaler.transform(df[['Fare', 'FamilySize']])
+        df[["Fare", "FamilySize"]] = scaler.transform(df[["Fare", "FamilySize"]])
+
+        df = df[
+            [
+                "Pclass",
+                "Fare",
+                "FamilySize",
+                "Sex_male",
+                "Embarked_Q",
+                "Embarked_S",
+                "AgeGroup_young_adult",
+                "AgeGroup_adult",
+                "AgeGroup_elderly",
+            ]
+        ]
 
         # Make prediction using the loaded model
         prediction = model.predict(df)[0]
@@ -90,3 +104,4 @@ def predict():
 
 if __name__ == "__main__":
     app.run(debug=True)
+    print("running")
